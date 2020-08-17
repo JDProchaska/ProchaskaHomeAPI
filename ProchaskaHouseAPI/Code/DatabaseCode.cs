@@ -1,42 +1,86 @@
 ﻿using Microsoft.Ajax.Utilities;
-using Microsoft.Data.Sqlite;
+using System.Data.SQLite;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Web;
+using ProchaskaHouseAPI.Models;
 
 namespace ProchaskaHouseAPI.Code
 {
     public class DatabaseCode
     {
+        string dbPath = Path.Combine(@"C:\Users\jooj9\source\repos\JDProchaska\ProchaskaHomeAPI\Database", "Home.db");
+        SQLiteConnection db;
+        SQLiteCommand dbCommand;
 
-        public string GetPeople()
+        public List<Chore> GetChores()
         {
-            string dbPath = Path.Combine(@"C:\Users\jooj9\source\repos\ProchaskaHouseAPI\Database", "Home.db");
+            List<Chore> chores = new List<Chore>();
             string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
-            SqliteConnection db;
-            SqliteCommand dbCommand;
 
-            db = new SqliteConnection(cs);
+            db = new SQLiteConnection(cs);
             db.Open();
 
-            string sqlStatement = "Select * from People";
-            string returnJSON = "{";
+            string sqlStatement = "Select * from ChoresToBeDone";
 
-            dbCommand = new SqliteCommand(sqlStatement, db);
-
-            SqliteDataReader dbReader = dbCommand.ExecuteReader();
-
-            while (dbReader.Read())
+            dbCommand = new SQLiteCommand(sqlStatement, db);
+            using (var transaction = db.BeginTransaction())
             {
-                returnJSON += ($"{{\"ID\":{dbReader.GetInt32(0)}\n \"Name\": \"{dbReader.GetString(1)}\"}}");
+                SQLiteDataReader dbReader = dbCommand.ExecuteReader();
+
+                while (dbReader.Read())
+                {
+                    Chore chore = new Chore();
+                    chore.Id = dbReader.GetInt32(0);
+                    chore.Name = dbReader.GetString(1);
+                    chore.Person = dbReader.GetString(2);
+                    chore.Added = DateTime.Parse(dbReader.GetValue(3).ToString());
+                    chores.Add(chore);
+                }
             }
-            
 
-            return returnJSON + "}";
 
+            return chores;
+        }
+
+        public void AddChore(Chore chore)
+        {
+            string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
+
+            db = new SQLiteConnection(cs);
+            db.Open();
+
+            string sqlStatement = $"Insert into ChoresToBeDone (Id, Name, Person, AddedDate)" +
+                $"Values ({chore.Id}, \"{chore.Name}\", \"{chore.Person}\", \"{chore.Added}\")";
+
+            dbCommand = new SQLiteCommand(sqlStatement, db);
+            using (var transaction = db.BeginTransaction())
+            {
+                dbCommand.ExecuteNonQuery();
+                transaction.Commit();
+            }
+            db.Close();
+
+        }
+
+        public void DeleteChore(Chore chore)
+        {
+            string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
+
+            db = new SQLiteConnection(cs);
+            db.Open();
+
+            string sqlStatement = $"Delete from Chore where ID = {chore.Id}";
+            dbCommand = new SQLiteCommand(sqlStatement, db);
+            using (var transaction = db.BeginTransaction())
+            {
+                dbCommand.ExecuteNonQuery();
+                transaction.Commit();
+            }
+            db.Close();
         }
     }
 }
