@@ -12,7 +12,7 @@ namespace ProchaskaHouseAPI.Code
 {
     public class DatabaseCode
     {
-        string dbPath = Path.Combine(@"C:\Users\jooj9\source\repos\JDProchaska\ProchaskaHomeAPI\Database", "Home.db");
+        string dbPath = Path.Combine(@"C:\Users\jooj9\source\repos\ProchaskaHomeAPI\Database", "Home.db");
         SQLiteConnection db;
         SQLiteCommand dbCommand;
 
@@ -46,9 +46,10 @@ namespace ProchaskaHouseAPI.Code
             return chores;
         }
 
-        public void AddChore(Chore chore)
+        public bool AddChore(Chore chore)
         {
             string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
+            bool success = false;
 
             db = new SQLiteConnection(cs);
             db.Open();
@@ -61,9 +62,12 @@ namespace ProchaskaHouseAPI.Code
             {
                 dbCommand.ExecuteNonQuery();
                 transaction.Commit();
+                if (db.Changes > 0)
+                    success = true;
             }
             db.Close();
 
+            return success;
         }
 
         public void DeleteChore(Chore chore)
@@ -73,7 +77,7 @@ namespace ProchaskaHouseAPI.Code
             db = new SQLiteConnection(cs);
             db.Open();
 
-            string sqlStatement = $"Delete from Chore where ID = {chore.Id}";
+            string sqlStatement = $"Delete from Chore where name like {chore.Name}";
             dbCommand = new SQLiteCommand(sqlStatement, db);
             using (var transaction = db.BeginTransaction())
             {

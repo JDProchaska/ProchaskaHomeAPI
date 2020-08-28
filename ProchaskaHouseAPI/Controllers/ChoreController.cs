@@ -13,15 +13,18 @@ namespace ProchaskaHouseAPI.Controllers
 {
     public class ChoreController : ApiController
     {
-        // GET: api/Chore
-        [HttpGet("GetChores")]
-        public List<Chore> Get()
+        // GET: api/Chore/GetChores
+        [Route("api/Chore/GetChores")]
+        [HttpGet]
+        public List<Chore> GetChores()
         {
             DatabaseCode dbCode = new DatabaseCode();
             return dbCode.GetChores();
         }
 
-        // POST: api/Chore
+        // POST: api/Chore/AddChore
+        [Route("api/Chore/AddChore")]
+        [HttpPost]
         public void Post(Chore value)
         {
             //Chore chore = new Chore();
@@ -39,8 +42,11 @@ namespace ProchaskaHouseAPI.Controllers
         }
 
         // DELETE: api/Chore/5
-        public void Delete(int id)
+        public void Delete(Chore value)
         {
+            DatabaseCode dbCode = new DatabaseCode();
+            dbCode.DeleteChore(value);
+
         }
     }
 }
