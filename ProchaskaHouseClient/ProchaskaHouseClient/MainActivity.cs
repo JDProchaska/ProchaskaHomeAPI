@@ -3,6 +3,8 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Runtime;
 using Android.Widget;
+using RestSharp;
+using Java.Net;
 
 namespace ProchaskaHouseClient
 {
@@ -21,6 +23,20 @@ namespace ProchaskaHouseClient
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        private void getShoppingList_Click()
+        {
+            IRestRequest request = new RestRequest();
+            request.Method = Method.GET;
+            request.Resource = "ShoppingList/GetList";
+
+            RestClient rClient = new RestClient();
+
+            rClient.BaseUrl = new System.Uri("https://localhost:44350/api/");
+
+            IRestResponse response = rClient.Execute(request);
+
         }
     }
 }

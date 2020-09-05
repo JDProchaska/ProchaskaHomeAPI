@@ -16,6 +16,7 @@ namespace ProchaskaHouseAPI.Code
         SQLiteConnection db;
         SQLiteCommand dbCommand;
 
+        #region Chore Calls
         public List<Chore> GetChores()
         {
             List<Chore> chores = new List<Chore>();
@@ -86,5 +87,39 @@ namespace ProchaskaHouseAPI.Code
             }
             db.Close();
         }
+        #endregion
+
+        #region Shopping List Calls
+        public List<ShoppingListItem> GetShoppingList()
+        {
+            List<ShoppingListItem> items = new List<ShoppingListItem>();
+            string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
+
+            db = new SQLiteConnection(cs);
+            db.Open();
+
+            string sqlStatement = "Select * from ShoppingList";
+
+            dbCommand = new SQLiteCommand(sqlStatement, db);
+            using (var transaction = db.BeginTransaction())
+            {
+                SQLiteDataReader dbReader = dbCommand.ExecuteReader();
+
+                while (dbReader.Read())
+                {
+                    ShoppingListItem item = new ShoppingListItem();
+                    item.ID = dbReader.GetInt32(0);
+                    item.Name = dbReader.GetString(1);
+                    item.Qty = dbReader.GetInt32(2);
+                    item.Checked = dbReader.GetInt32(3);
+                    items.Add(item);
+                }
+            }
+
+
+            return items;
+        }
+
+        #endregion
     }
 }
