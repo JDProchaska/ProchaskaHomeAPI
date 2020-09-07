@@ -14,11 +14,20 @@ namespace ProchaskaHouseAPI.Controllers
         // GET: api/ShoppingList
         [Route("api/ShoppingList/GetList")]
         [HttpGet]
-        public IEnumerable<ShoppingListItem> Get()
+        public List<ShoppingListItem> Get()
         {
             DatabaseCode dbCode = new DatabaseCode();
             return dbCode.GetShoppingList();
         }
+
+        [Route("api/ShoppingList/GetItem/{id}")]
+        [HttpGet]
+        public ShoppingListItem Get(int id)
+        {
+            DatabaseCode dbCode = new DatabaseCode();
+            return dbCode.GetListItem(id);
+        }
+
 
         // POST: api/ShoppingList
         public void Post([FromBody]string value)

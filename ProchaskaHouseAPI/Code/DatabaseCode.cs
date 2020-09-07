@@ -119,6 +119,35 @@ namespace ProchaskaHouseAPI.Code
 
             return items;
         }
+        public ShoppingListItem GetListItem(int id)
+        {
+            string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
+            ShoppingListItem resultItem = new ShoppingListItem();
+
+            db = new SQLiteConnection(cs);
+            db.Open();
+
+            string sql = $"Select * from ShoppingList where ID = {id}";
+
+            dbCommand = new SQLiteCommand(sql, db);
+            using (var transaction = db.BeginTransaction())
+            {
+                SQLiteDataReader dbReader = dbCommand.ExecuteReader();
+
+                while (dbReader.Read())
+                {
+                    ShoppingListItem item = new ShoppingListItem();
+                    item.ID = dbReader.GetInt32(0);
+                    item.Name = dbReader.GetString(1);
+                    item.Qty = dbReader.GetInt32(2);
+                    item.Checked = dbReader.GetInt32(3);
+
+                    resultItem = item;
+                }
+            }
+
+            return resultItem;
+        }
 
         #endregion
     }
