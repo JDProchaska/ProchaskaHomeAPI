@@ -12,7 +12,7 @@ namespace ProchaskaHouseAPI.Code
 {
     public class DatabaseCode
     {
-        string dbPath = Path.Combine(@"C:\Users\jooj9\source\repos\ProchaskaHomeAPI\Database", "Home.db");
+        string dbPath = Path.Combine(@"C:\Users\proch\source\repos\JDProchaska\ProchaskaHomeAPI\Database", "Home.db");
         SQLiteConnection db;
         SQLiteCommand dbCommand;
 
@@ -149,6 +149,61 @@ namespace ProchaskaHouseAPI.Code
             return resultItem;
         }
 
+        #endregion
+
+        #region Meal Calls
+        public List<Meal> GetMeals()
+        {
+            List<Meal> meals = new List<Meal>();
+            string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
+
+            db = new SQLiteConnection(cs);
+            db.Open();
+
+            string sqlStatement = "Select * from Meals";
+
+            dbCommand = new SQLiteCommand(sqlStatement, db);
+            using (var transaction = db.BeginTransaction())
+            {
+                SQLiteDataReader dbReader = dbCommand.ExecuteReader();
+
+                while (dbReader.Read())
+                {
+                    Meal meal = new Meal();
+                    meal.ID = dbReader.GetInt32(0);
+                    meal.Name = dbReader.GetString(1);
+                    if (!dbReader.IsDBNull(2))
+                        meal.Picture = dbReader.GetInt32(2);
+                    meals.Add(meal);
+                }
+            }
+
+
+            return meals;
+        }
+        public bool AddMeal(Meal meal)
+        {
+            string cs = $"Data Source={dbPath}; Mode=ReadOnly;";
+            bool success = false;
+
+            db = new SQLiteConnection(cs);
+            db.Open();
+
+            string sqlStatement = $"Insert into Meals (Name)" +
+                $"Values (\"{meal.Name}\")";
+
+            dbCommand = new SQLiteCommand(sqlStatement, db);
+            using (var transaction = db.BeginTransaction())
+            {
+                dbCommand.ExecuteNonQuery();
+                transaction.Commit();
+                if (db.Changes > 0)
+                    success = true;
+            }
+            db.Close();
+
+            return success;
+        }
         #endregion
     }
 }
